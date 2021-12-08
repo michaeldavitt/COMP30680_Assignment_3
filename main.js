@@ -41,15 +41,15 @@ function total_sales(){
         // Iterate through the data
         for (var j = 0; j < customer_data.length; j++) {
     
-            // Isolate the first data item
-            if (j==4) {
+            // Isolate the total payments
+            if (j==3) {
 
-                // Replace the first data item with a button that calls a function to display certain rows in the product table
-                cumulative_sales += parseInt(customer_data[j].innerHTML)
+                // Add the total payments to the total sales cumulative figure
+                cumulative_sales += parseFloat(customer_data[j].innerHTML)
 
             }
         }
     }
     
-    document.getElementById("total-sales").innerHTML = cumulative_sales;
+    document.getElementById("total-sales").innerHTML = cumulative_sales.toFixed(2);
 }

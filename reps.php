@@ -111,14 +111,14 @@
                             "; 
                             echo $full_name; 
                             echo " - Total Sales Value: $<span id=\"total-sales\"></span></h2>
+                            <h3>Customer Details (<a href=\"#customer-order-header\">Click to view customer order log</a>)</h3>
                             <div class=\"table-wrapper\">
                                 <table id=\"customers\">
                                     <tr>
-                                        <th>Customer Name</th>
-                                        <th>Customer Address</th>
-                                        <th>Customer Credit Limit</th>
-                                        <th>Customer Order Number</th>
-                                        <th>Customer Payment</th>
+                                        <th>Name</th>
+                                        <th>Address</th>
+                                        <th>Credit Limit</th>
+                                        <th>Total Payments</th>
                                     </tr>";
 
 
@@ -126,12 +126,12 @@
                                     $stmt = $conn->prepare("SELECT C.customerName, 
                                     REPLACE(CONCAT(C.addressLine1, \", \", COALESCE(C.addressLine2, \"\"), \", \", C.city, \", \", 
                                     COALESCE(C.state, \"\"), \", \", C.country), \", ,\", \",\"), 
-                                    C.creditLimit, O.orderNumber, ROUND(SUM(OD.quantityOrdered * OD.priceEach), 2) 
-                                    FROM customers AS C, employees AS E, orders AS O, orderdetails AS OD 
+                                    C.creditLimit, ROUND(SUM(P.amount), 2)
+                                    FROM customers AS C, employees AS E, payments AS P
                                     WHERE CONCAT(E.firstName, \" \", E.lastName) = \"$full_name\" AND E.employeeNumber = C.salesRepEmployeeNumber 
-                                    AND O.customerNumber = C.customerNumber AND O.orderNumber = OD.orderNumber 
-                                    GROUP BY O.orderNumber
-                                    ORDER BY C.customerName, O.orderNumber");
+                                    AND C.customerNumber = P.customerNumber
+                                    GROUP By C.customerNumber
+                                    ORDER BY C.customerName");
                                     $stmt->execute();
 
                                     // set the resulting array to associative
@@ -143,6 +143,39 @@
 
                                     echo "<script src=main.js></script>";
                                     echo "<script>total_sales()</script>";
+                                }
+
+                                // Exception handling for when the SQL query fails
+                                catch(PDOException $e) {
+                                    echo "<p class=\"error-message\">Message: " . $e->getMessage() . "</p>";
+                                }
+
+                                echo "
+                                </table>
+                            </div>
+
+                            <h3 id=\"customer-order-header\">Order Log</h3>
+                            <div class=\"table-wrapper\">
+                                <table id=\"customer-orders\">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Order</th>
+                                    </tr>";
+
+                                try {
+                                    $stmt = $conn->prepare("SELECT C.customerName, O.orderNumber
+                                    FROM customers AS C, employees AS E, orders AS O
+                                    WHERE CONCAT(E.firstName, \" \", E.lastName) = \"$full_name\" AND E.employeeNumber = C.salesRepEmployeeNumber 
+                                    AND C.customerNumber = O.customerNumber
+                                    ORDER BY C.customerName, O.orderNumber");
+                                    $stmt->execute();
+
+                                    // set the resulting array to associative
+                                    $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+                                    foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                                        echo $v;
+                                    } 
                                 }
 
                                 // Exception handling for when the SQL query fails
