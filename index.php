@@ -98,6 +98,18 @@
                 <form id="product-form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
                     <div class="form-section">
                         <h3>Filter by Product Line</h3>
+                        <script>
+
+                            function toggle(source) {
+                                var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i] != source)
+                                        checkboxes[i].checked = source.checked;
+                                }
+                            }
+
+                        </script>
+                        <label for="All"> Select All </label><input type="checkbox" id="All" name="All" onclick="toggle(this)" <?php if (isset($_POST["All"])) echo "checked";?> value="All">
                         <label for="ClassicCars"> Classic Cars </label><input type="checkbox" id="ClassicCars" name="ClassicCars" <?php if (isset($_POST["ClassicCars"])) echo "checked";?> value="Classic Cars">
                         <label for="Motorcycles"> Motorcycles </label><input type="checkbox" id="Motorcycles" name="Motorcycles" <?php if (isset($_POST["Motorcycles"])) echo "checked";?> value="Motorcycles">
                         <label for="Planes"> Planes </label><input type="checkbox" id="Planes" name="Planes" <?php if (isset($_POST["Planes"])) echo "checked";?> value="Planes">
