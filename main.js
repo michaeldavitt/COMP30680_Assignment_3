@@ -40,12 +40,20 @@ function total_sales(){
     
         // Iterate through the data
         for (var j = 0; j < customer_data.length; j++) {
+
+            // Isolate Credit Limit to add dollar sign
+            if (j==2) {
+                converted_credit_limit = "$" + customer_data[j].innerHTML
+                customer_data[j].innerHTML = converted_credit_limit 
+            }
     
-            // Isolate the total payments
+            // Isolate the total payments to add dollar sign, convert to integer and add to cumulative sales figure
             if (j==3) {
 
                 // Add the total payments to the total sales cumulative figure
-                cumulative_sales += parseFloat(customer_data[j].innerHTML)
+                converted_total_payment = parseFloat(customer_data[j].innerHTML)
+                cumulative_sales += converted_total_payment
+                customer_data[j].innerHTML = "$" + converted_total_payment
 
             }
         }
