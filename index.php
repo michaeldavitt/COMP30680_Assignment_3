@@ -166,48 +166,55 @@
                             $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                            // Create if/elseif/else which executes specific queries depending on user input
+                            try {
+                                // Create if/elseif/else which executes specific queries depending on user input
 
-                            // Query for when the user has specified an order by and a limit
-                            if (!empty($order) && !empty($limit)) {
-                                $stmt = $conn->prepare("SELECT productName, productCode, productDescription, quantityInStock, 
-                                MSRP FROM products WHERE productLine IN ('" . $productLines . "') AND quantityInStock < $limit 
-                                ORDER BY productLine, quantityInStock $order");
-                            } 
-                                
-                            // Query for when the user has specified an order by, but not a limit
-                            elseif (!empty($order)) {
-                                $stmt = $conn->prepare("SELECT productName, productCode, productDescription, quantityInStock, 
-                                MSRP FROM products WHERE productLine IN ('" . $productLines . "') ORDER BY productLine, quantityInStock $order");
-                            } 
-                                
-                            // Query for when the user has specified a limit, but not an order by 
-                            elseif (!empty($limit)) {
-                                $stmt = $conn->prepare("SELECT productName, productCode, productDescription, quantityInStock, 
-                                MSRP FROM products WHERE productLine IN ('" . $productLines . "') AND quantityInStock < $limit 
-                                ORDER BY productLine");
-                            } 
-                                
-                            // Query for when the user has not specified either an order by or a limit
-                            else {
-                                $stmt = $conn->prepare("SELECT productName, productCode, productDescription, quantityInStock, 
-                                MSRP FROM products WHERE productLine IN ('" . $productLines . "') ORDER BY productLine");
+                                // Query for when the user has specified an order by and a limit
+                                if (!empty($order) && !empty($limit)) {
+                                    $stmt = $conn->prepare("SELECT productName, productCode, productDescription, quantityInStock, 
+                                    MSRP FROM products WHERE productLine IN ('" . $productLines . "') AND quantityInStock < $limit 
+                                    ORDER BY productLine, quantityInStock $order");
+                                } 
+                                    
+                                // Query for when the user has specified an order by, but not a limit
+                                elseif (!empty($order)) {
+                                    $stmt = $conn->prepare("SELECT productName, productCode, productDescription, quantityInStock, 
+                                    MSRP FROM products WHERE productLine IN ('" . $productLines . "') ORDER BY productLine, quantityInStock $order");
+                                } 
+                                    
+                                // Query for when the user has specified a limit, but not an order by 
+                                elseif (!empty($limit)) {
+                                    $stmt = $conn->prepare("SELECT productName, productCode, productDescription, quantityInStock, 
+                                    MSRP FROM products WHERE productLine IN ('" . $productLines . "') AND quantityInStock < $limit 
+                                    ORDER BY productLine");
+                                } 
+                                    
+                                // Query for when the user has not specified either an order by or a limit
+                                else {
+                                    $stmt = $conn->prepare("SELECT productName, productCode, productDescription, quantityInStock, 
+                                    MSRP FROM products WHERE productLine IN ('" . $productLines . "') ORDER BY productLine");
+                                }
+                                    
+                                $stmt->execute();
+
+                                // set the resulting array to associative
+                                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+                                    
+                                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                                    echo $v;
+                                }
+
                             }
-                                
-                            $stmt->execute();
 
-                            // set the resulting array to associative
-                            $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
-                                
-                            foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
-                                echo $v;
+                            catch(PDOException) {
+                                echo "<p class=\"error-message\">Error: Data unavailable. Failed to extract data pertaining to products. Please try again later</p>";
                             }
 
                         } 
                         
                         // Exception handling for when we can't connect to the database or if the query fails
-                        catch(PDOException $e) {
-                            echo "<p class=\"error-message\">Message: " . $e->getMessage() . "</p>";
+                        catch(PDOException) {
+                            echo "<p class=\"error-message\">Error: Data unavailable. Failed to connect to database. Please try again later</p>";
                         }
                         
                         // Remove connection to the database when we have all the required data.

@@ -59,25 +59,33 @@
                             $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                            $stmt = $conn->prepare("SELECT CONCAT(E1.firstName, \" \", E1.lastName), E1.email, 
-                            REPLACE(REPLACE(CONCAT(O.addressLine1, \", \", COALESCE(O.addressLine2, \"\"), \", \", 
-                            COALESCE(O.state, \"\"), \", \", O.country), \", , ,\", \",\"), \", ,\", \",\"), 
-                            CONCAT(E2.firstName, \" \", E2.lastName) 
-                            FROM employees AS E1, offices AS O, employees AS E2 
-                            WHERE E1.jobTitle = \"Sales Rep\" AND E1.officeCode = O.officeCode AND E1.reportsTo = E2.employeeNumber");
-                            $stmt->execute();
-                            // set the resulting array to associative
-                            $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
-                            
-                            foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
-                                echo $v;
+                            try{
+
+                                $stmt = $conn->prepare("SELECT CONCAT(E1.firstName, \" \", E1.lastName), E1.email, 
+                                REPLACE(REPLACE(CONCAT(O.addressLine1, \", \", COALESCE(O.addressLine2, \"\"), \", \", 
+                                COALESCE(O.state, \"\"), \", \", O.country), \", , ,\", \",\"), \", ,\", \",\"), 
+                                CONCAT(E2.firstName, \" \", E2.lastName) 
+                                FROM employees AS E1, offices AS O, employees AS E2 
+                                WHERE E1.jobTitle = \"Sales Rep\" AND E1.officeCode = O.officeCode AND E1.reportsTo = E2.employeeNumber");
+                                $stmt->execute();
+                                // set the resulting array to associative
+                                $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+                                
+                                foreach(new TableRows(new RecursiveArrayIterator($stmt->fetchAll())) as $k=>$v) {
+                                    echo $v;
+                                }
+
+                            }
+
+                            catch(PDOException) {
+                                echo "<p class=\"error-message\">Error: Data unavailable. Failed to extract data pertaining to sales reps. Please try again later</p>";
                             }
 
                         } 
                         
                         // Exception handling for when we can't connect to the database or if the query fails
-                        catch(PDOException $e) {
-                            echo "<p class=\"error-message\">Message: " . $e->getMessage() . "</p>";
+                        catch(PDOException) {
+                            echo "<p class=\"error-message\">Error: Data unavailable. Failed to connect to database. Please try again later</p>";
                         }
 
                     echo "</table>
@@ -146,8 +154,8 @@
                                 }
 
                                 // Exception handling for when the SQL query fails
-                                catch(PDOException $e) {
-                                    echo "<p class=\"error-message\">Message: " . $e->getMessage() . "</p>";
+                                catch(PDOException) {
+                                    echo "<p class=\"error-message\">Error: Data unavailable. Failed to extract data pertaining to customers. Please try again later</p>";
                                 }
 
                                 echo "
@@ -179,8 +187,8 @@
                                 }
 
                                 // Exception handling for when the SQL query fails
-                                catch(PDOException $e) {
-                                    echo "<p class=\"error-message\">Message: " . $e->getMessage() . "</p>";
+                                catch(PDOException) {
+                                    echo "<p class=\"error-message\">Error: Data unavailable. Failed to extract data pertaining to customer orders. Please try again later</p>";
                                 }
                                 
                                 // Remove connection to the database when we have all the required data.
